@@ -5,6 +5,9 @@ using System;
 
 public class GameManager : MonoBehaviour {
     public event Action EventStartGamePlay;
+    public event Action EventWinGame;
+    public event Action EventLoseGame;
+    public event Action<int> EventTickTimer;
 
     static GameManager instance;
     public static GameManager Instance
@@ -12,8 +15,11 @@ public class GameManager : MonoBehaviour {
         get { return instance; }
     }
     public DataManager dataManager;
+    public UIManager uiManager1P;
+    public UIManager uiManager2P;
 
     public bool isPlaying;
+    public int timer = 60;
 
     private void Awake()
     {
@@ -34,11 +40,13 @@ public class GameManager : MonoBehaviour {
         player1.EventHitPlayer += OnHitPlayer;
         player1.EventDropPlayer += OnDropPlayer;
         player1.EventPickupCoin += OnPickupCoin;
+        player1.EventDiePlayer += OnDiePlayer;
 
         PlayerCtrl player2 = dataManager.player2;
         player2.EventHitPlayer += OnHitPlayer;
         player2.EventDropPlayer += OnDropPlayer;
         player2.EventPickupCoin += OnPickupCoin;
+        player2.EventDiePlayer += OnDiePlayer;
 
         Init();
 
@@ -47,6 +55,7 @@ public class GameManager : MonoBehaviour {
 
     public void Init()
     {
+        isPlaying = false;
         ScrollCtrl.isScrolling1P = false;
         ScrollCtrl.isScrolling2P = false;
     }
@@ -55,6 +64,15 @@ public class GameManager : MonoBehaviour {
     {
         yield return new WaitForSeconds(2f);
         EventStartGamePlay();
+        StartCoroutine(CalculateTimer());
+    }
+
+    IEnumerator CalculateTimer()
+    {
+        yield return new WaitForSeconds(1f);
+        if(EventTickTimer != null)
+            EventTickTimer(--timer);
+        StartCoroutine(CalculateTimer());
     }
 
     void OnStartGamePlay()
@@ -62,6 +80,11 @@ public class GameManager : MonoBehaviour {
         isPlaying = true;
         ScrollCtrl.isScrolling1P = true;
         ScrollCtrl.isScrolling2P = true;
+    }
+
+    void OnTickTimer()
+    {
+        Debug.Log("Timer : " + timer);
     }
 	
 	// Update is called once per frame
@@ -71,17 +94,85 @@ public class GameManager : MonoBehaviour {
 
     void OnHitPlayer(PlayerCtrl player)
     {
+        Debug.Log(player.name + " 가 맞았다.");
+        StartCoroutine(CoHitPlayer(player));
+    }
 
+    //기술부채
+
+    IEnumerator CoHitPlayer(PlayerCtrl player)
+    {
+        switch (player.playerSide)
+        {
+            case ePlayerSide.Player1:   ScrollCtrl.scrollSpeed1P = -1f; break;
+            case ePlayerSide.Player2:   ScrollCtrl.scrollSpeed2P = -1f; break;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        switch (player.playerSide)
+        {
+            case ePlayerSide.Player1: ScrollCtrl.isScrolling1P = false; break;
+            case ePlayerSide.Player2: ScrollCtrl.isScrolling2P = false; break;
+        }
+        yield return new WaitForSeconds(1f);
+        switch (player.playerSide)
+        {
+            case ePlayerSide.Player1: ScrollCtrl.isScrolling1P = true; break;
+            case ePlayerSide.Player2: ScrollCtrl.isScrolling2P = true; break;
+        }
+
+        switch (player.playerSide)
+        {
+            case ePlayerSide.Player1: ScrollCtrl.scrollSpeed1P = 2.5f; break;
+            case ePlayerSide.Player2: ScrollCtrl.scrollSpeed2P = 2.5f; break;
+        }
     }
 
     void OnDropPlayer(PlayerCtrl player)
+        
     {
+        Debug.Log(player.name + " 가 떨어졌다.");
+        StartCoroutine(CoDropPlayer(player));
+    }
 
+    //기술부채
+    IEnumerator CoDropPlayer(PlayerCtrl player)
+    {
+        switch (player.playerSide)
+        {
+            case ePlayerSide.Player1:   ScrollCtrl.scrollSpeed1P = -1f; break;
+            case ePlayerSide.Player2:   ScrollCtrl.scrollSpeed2P = -1f; break;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        switch (player.playerSide)
+        {
+            case ePlayerSide.Player1: ScrollCtrl.isScrolling1P = false; break;
+            case ePlayerSide.Player2: ScrollCtrl.isScrolling2P = false; break;
+        }
+        yield return new WaitForSeconds(1f);
+        switch (player.playerSide)
+        {
+            case ePlayerSide.Player1: ScrollCtrl.isScrolling1P = true; break;
+            case ePlayerSide.Player2: ScrollCtrl.isScrolling2P = true; break;
+        }
+
+        switch (player.playerSide)
+        {
+            case ePlayerSide.Player1: ScrollCtrl.scrollSpeed1P = 2.5f; break;
+            case ePlayerSide.Player2: ScrollCtrl.scrollSpeed2P = 2.5f; break;
+        }
     }
 
     void OnPickupCoin(PlayerCtrl player)
     {
-
+        Debug.Log(player.name + " 가 동전을 주웠다.");
     }
 
+    void OnDiePlayer(PlayerCtrl player)
+    {
+        player.isAlive = false;
+    }
 }

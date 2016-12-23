@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ScrollCtrl : MonoBehaviour {
-    public static bool isScrolling1P = true;
-    public static bool isScrolling2P = true;
-    public static float scrollSpeed1P = 3f;
-    public static float scrollSpeed2P = 3f;
+    public static bool isScrolling1P = false;
+    public static bool isScrolling2P = false;
+    public static float scrollSpeed1P = 2.5f;
+    public static float scrollSpeed2P = 2.5f;
 
     public ePlayerSide playerSide = ePlayerSide.None;
 

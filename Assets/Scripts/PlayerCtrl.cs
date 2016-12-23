@@ -8,6 +8,7 @@ public class PlayerCtrl : MonoBehaviour {
     public event Action<PlayerCtrl> EventHitPlayer;     //장애물에 걸렸을 때
     public event Action<PlayerCtrl> EventDropPlayer;    //바닥에 떨어졌을 때
     public event Action<PlayerCtrl> EventPickupCoin;    //코인을 먹었을 때
+    public event Action<PlayerCtrl> EventDiePlayer;     //플레이어가 죽었을 때
 
     Animator animator;
 
@@ -21,6 +22,27 @@ public class PlayerCtrl : MonoBehaviour {
         None,
         MoveRight,
         MoveLeft
+    }
+
+    public bool isAlive = true;
+
+    int hp = 3;
+    public int HP
+    {
+        get { return hp; }
+        set { hp = value; }
+    }
+    int mp = 3;
+    public int MP
+    {
+        get { return mp; }
+        set { mp = value; }
+    }
+    int coin = 0;
+    public int Coin
+    {
+        get { return coin; }
+        set { coin = value; }
     }
 
     float[] arrMoveXPos = null;
@@ -69,19 +91,38 @@ public class PlayerCtrl : MonoBehaviour {
         Debug.Log(strTrigger);
         animator.SetTrigger(strTrigger);
 
-        transform.DOLocalMoveX(arrMoveXPos[idx], 0.5f);
+        transform.DOLocalMoveX(arrMoveXPos[idx], 0.2f);
         playerPosIdx = idx;
     }
 
     public void HitPlayer()
     {
-        if(EventHitPlayer != null)
+        hp--;
+        if (hp < 0)
+        {
+            hp = 0;
+            if (!isAlive)
+                return;
+            if (EventDiePlayer != null)
+                EventDiePlayer(this);
+        }
+        if (EventHitPlayer != null)
             EventHitPlayer(this);
         Debug.Log("Hit");
     }
 
     public void DropPlayer()
     {
+        hp--;
+        if (hp < 0)
+        {
+            hp = 0;
+            if (!isAlive)
+                return;
+            if (EventDiePlayer != null)
+                EventDiePlayer(this);
+            return;
+        }
         if(EventDropPlayer != null)
             EventDropPlayer(this);
         Debug.Log("Drop");

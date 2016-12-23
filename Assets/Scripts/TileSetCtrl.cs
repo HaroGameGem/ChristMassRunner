@@ -50,6 +50,21 @@ public class TileSetCtrl : MonoBehaviour {
     private void OnDisable()
     {
         if(EventDisableTile != null)
+        {
             EventDisableTile(this);
+
+            ITileObject tileObject = null;
+            for (int i = 0; i < arrTileType.Length / 4; i++)
+            {
+                for (int j = 0; j < arrTileType.Length / 2; j++)
+                {
+                    tileObject = transform.GetChild(j + (i * 4)).GetChild(0).GetComponent<ITileObject>();
+                    if (tileObject != null)
+                    {
+                        tileObject.Init();
+                    }
+                }
+            }
+        }
     }
 }
